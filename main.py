@@ -9,7 +9,7 @@ from io import BytesIO
 app = Flask(__name__)
 
 # Load the trained model
-model = tf.keras.models.load_model('finasih.h5')
+model = tf.keras.models.load_model('finallsih.h5')
 
 # Firebase configuration
 config = {
