@@ -1,15 +1,23 @@
 from flask import Flask, request, jsonify
 import requests
+import pickle
 import numpy as np
 from PIL import Image
 import tensorflow as tf
-import pyrebase
 from io import BytesIO
+import pyrebase
 
 app = Flask(__name__)
 
-# Load the trained model
-model = tf.keras.models.load_model('finasih.h5')
+# Load the StandardScaler and machine learning model for water quality prediction
+with open('scaler.pkl', 'rb') as scaler_file:
+    scaler = pickle.load(scaler_file)
+
+with open('model.pkl', 'rb') as model_file:
+    model_water_quality = pickle.load(model_file)
+
+# Load the trained image processing model
+model_image_processing = tf.keras.models.load_model('finasih.h5')
 
 # Firebase configuration
 config = {
@@ -26,13 +34,6 @@ config = {
 
 firebase = pyrebase.initialize_app(config)
 storage = firebase.storage()
-
-# Load the StandardScaler and machine learning model for water quality prediction
-with open('scaler.pkl', 'rb') as scaler_file:
-    scaler = pickle.load(scaler_file)
-
-with open('model.pkl', 'rb') as model_file:
-    water_quality_model = pickle.load(model_file)
 
 def calculate_pixels(image_url):
     # Download the image from the URL
@@ -60,6 +61,30 @@ def calculate_pixels(image_url):
 
     return total_pixels, white_pixels
 
+@app.route('/predict_water_quality', methods=['POST'])
+def predict_water_quality():
+    try:
+        # Get input parameters from the request
+        input_data = request.get_json(force=True)
+
+        # Extract features and convert to float
+        features = [float(input_data[param]) for param in ['ph', 'Hardness', 'Solids', 'Chloramines', 'Sulfate', 'Conductivity', 'Organic_carbon', 'Trihalomethanes', 'Turbidity']]
+
+        # Apply StandardScaler
+        scaled_features = scaler.transform([features])
+
+        # Make predictions
+        prediction = model_water_quality.predict(scaled_features)[0]
+
+        # Convert prediction to a regular Python integer
+        prediction = int(prediction)
+
+        # Return the prediction as JSON
+        return jsonify({'prediction_water_quality': prediction})
+
+    except Exception as e:
+        return jsonify({'error_water_quality': str(e)})
+
 @app.route('/analyze', methods=['POST'])
 def analyze_image():
     try:
@@ -83,7 +108,7 @@ def analyze_image():
 
         return jsonify(result)
     except Exception as e:
-        return jsonify({'error': str(e)})
+        return jsonify({'error_image_analysis': str(e)})
 
 @app.route('/process_image', methods=['POST'])
 def process_image():
@@ -100,7 +125,7 @@ def process_image():
         input_array = np.expand_dims(input_array, axis=0)
 
         # Make predictions
-        predicted_mask = model.predict(input_array)
+        predicted_mask = model_image_processing.predict(input_array)
 
         # Post-process the predicted mask
         threshold = 0.4
@@ -120,30 +145,4 @@ def process_image():
 
         return jsonify({'output_image_url': storage.child(output_image_path).get_url(None)})
     except Exception as e:
-        return jsonify({'error': str(e)})
-
-# Define an endpoint for water quality predictions
-@app.route('/predict', methods=['POST'])
-def predict_water_quality():
-    try:
-        # Get input parameters from the request
-        input_data = request.get_json(force=True)
-
-        # Extract features and convert to float
-        features = [float(input_data[param]) for param in ['ph', 'Hardness', 'Solids', 'Chloramines', 'Sulfate', 'Conductivity', 'Organic_carbon', 'Trihalomethanes', 'Turbidity']]
-
-        # Apply StandardScaler
-        scaled_features = scaler.transform([features])
-
-        # Make predictions
-        prediction = water_quality_model.predict(scaled_features)[0]
-
-        # Convert prediction to a regular Python integer
-        prediction = int(prediction)
-
-        # Return the prediction as JSON
-        return jsonify({'prediction': prediction})
-
-    except Exception as e:
-        return jsonify({'error': str(e)})
-
+        return jsonify({'error_image_processing': str(e)})
