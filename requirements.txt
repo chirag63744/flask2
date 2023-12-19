@@ -5,3 +5,4 @@ numpy
 Pillow
 tensorflow
 pyrebase4
+scikit-learn
