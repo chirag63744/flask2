@@ -146,3 +146,4 @@ def predict_water_quality():
 
     except Exception as e:
         return jsonify({'error': str(e)})
+
