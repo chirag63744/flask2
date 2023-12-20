@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import requests
 import pickle
+import time
 import numpy as np
 from PIL import Image
 import tensorflow as tf
@@ -125,7 +126,7 @@ def process_image():
         input_array = np.expand_dims(input_array, axis=0)
 
         # Make predictions
-        predicted_mask = model_image_processing.predict(input_array)
+        predicted_mask = model.predict(input_array)
 
         # Post-process the predicted mask
         threshold = 0.4
@@ -134,15 +135,18 @@ def process_image():
         # Convert the binary mask array to a PIL Image
         output_image = Image.fromarray(binary_mask[0, ..., 0] * 255)
 
+        # Use the current timestamp to create a unique identifier
+        timestamp = int(time.time())
+
         # Save the output image to BytesIO in JPEG format
         output_image_bytesio = BytesIO()
         output_image.save(output_image_bytesio, format='JPEG')
         output_image_bytesio.seek(0)
 
-        # Save the BytesIO object to Firebase Storage
-        output_image_path = 'output_images/output.jpg'  # Change the path as needed
+        # Save the BytesIO object to Firebase Storage with a unique path
+        output_image_path = f'output_images/output_{timestamp}.jpg'
         storage.child(output_image_path).put(output_image_bytesio.getvalue())
 
         return jsonify({'output_image_url': storage.child(output_image_path).get_url(None)})
     except Exception as e:
-        return jsonify({'error_image_processing': str(e)})
+        return jsonify({'error': str(e)})
