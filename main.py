@@ -112,6 +112,7 @@ def analyze_image():
         return jsonify({'error_image_analysis': str(e)})
 
 @app.route('/process_image', methods=['POST'])
+@app.route('/process_image', methods=['POST'])
 def process_image():
     try:
         # Get the image URL from the request
@@ -126,7 +127,7 @@ def process_image():
         input_array = np.expand_dims(input_array, axis=0)
 
         # Make predictions
-        predicted_mask = model.predict(input_array)
+        predicted_mask = model_image_processing.predict(input_array)
 
         # Post-process the predicted mask
         threshold = 0.4
