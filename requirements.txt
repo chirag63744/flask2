@@ -5,4 +5,4 @@ numpy
 Pillow
 tensorflow
 pyrebase4
-scikit-learn==1.2.2
+scikit-learn==1.3.2
