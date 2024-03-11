@@ -155,5 +155,4 @@ def process_image():
         return jsonify({'output_image_url': storage.child(output_image_path).get_url(None)})
     except Exception as e:
         return jsonify({'error': str(e)})
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=80)
+
