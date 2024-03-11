@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,render_template
 import requests
 import pickle
 import time
@@ -35,6 +35,10 @@ config = {
 
 firebase = pyrebase.initialize_app(config)
 storage = firebase.storage()
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 def calculate_pixels(image_url):
     # Download the image from the URL
@@ -151,3 +155,5 @@ def process_image():
         return jsonify({'output_image_url': storage.child(output_image_path).get_url(None)})
     except Exception as e:
         return jsonify({'error': str(e)})
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=80)
