@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,render_template
 import requests
 import pickle
 import time
@@ -22,19 +22,23 @@ model_image_processing = tf.keras.models.load_model('finasih.h5')
 
 # Firebase configuration
 config = {
-    "apiKey": "AIzaSyBQ8XLzlON3FK_bGGRJlw6c2CakRzKtqt0",
-    "authDomain": "sih-springshed.firebaseapp.com",
-    "projectId": "sih-springshed",
-    "storageBucket": "sih-springshed.appspot.com",
-    "messagingSenderId": "171448540338",
-    "appId": "1:171448540338:web:2f3bdb3191f2261ed17dab",
-    "measurementId": "G-3L2DNTEL4W",
+    "apiKey": "AIzaSyBPOYDA0ttZvGglnXKpwSCNqodThovupSM",
+    "authDomain": "springjal-66c38.firebaseapp.com",
+    "projectId": "springjal-66c38",
+    "storageBucket": "springjal-66c38.appspot.com",
+    "messagingSenderId": "989140358334",
+    "appId": "1:989140358334:web:7c58efd5fd43e957297aef",
+    "measurementId": "G-2XPYW8VGBG",
     "serviceAccount": "serviceAccount.json",
-    "databaseURL": "https://sih-springshed-default-rtdb.firebaseio.com/"
+    "databaseURL": "https://springjal-66c38-default-rtdb.firebaseio.com/"
 }
 
 firebase = pyrebase.initialize_app(config)
 storage = firebase.storage()
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 def calculate_pixels(image_url):
     # Download the image from the URL
@@ -151,3 +155,5 @@ def process_image():
         return jsonify({'output_image_url': storage.child(output_image_path).get_url(None)})
     except Exception as e:
         return jsonify({'error': str(e)})
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=80)
