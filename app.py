@@ -17,7 +17,7 @@ with open('scaler.pkl', 'rb') as scaler_file:
 with open('model.pkl', 'rb') as model_file:
     model_water_quality = pickle.load(model_file)
 
-# Load the trained image processing model
+# Load the trained image p rocessing model
 model_image_processing = tf.keras.models.load_model('finasih.h5')
 
 # Firebase configuration
