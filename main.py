@@ -62,6 +62,9 @@ def calculate_pixels(image_url):
     white_pixels = np.count_nonzero(pixels == 255)
 
     return total_pixels, white_pixels
+@app.route('/')
+def index():
+  return render_template('index.html')
 
 @app.route('/predict_water_quality', methods=['POST'])
 def predict_water_quality():
