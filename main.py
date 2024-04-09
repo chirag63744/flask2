@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify,render_template
+from flask import Flask, request, jsonify, render_template
 import requests
 import pickle
 import time
@@ -116,7 +116,6 @@ def analyze_image():
         return jsonify({'error_image_analysis': str(e)})
 
 @app.route('/process_image', methods=['POST'])
-@app.route('/process_image', methods=['POST'])
 def process_image():
     try:
         # Get the image URL from the request
@@ -155,3 +154,6 @@ def process_image():
         return jsonify({'output_image_url': storage.child(output_image_path).get_url(None)})
     except Exception as e:
         return jsonify({'error': str(e)})
+
+if __name__ == '__main__':
+    app.run(port=5000)
